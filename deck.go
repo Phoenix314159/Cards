@@ -2,59 +2,32 @@ package main
 
 import (
 	"fmt"
-	"strings"
-	"io/ioutil"
-	"os"
-	"math/rand"
-	"time"
+	"ioutil" //implements some input output utilities functions
 )
 
-type deck []string
+type deck []string // "extends" a base type and adds additional functionality to it
 
-func newDeck() deck {
+//d variable is like 'this' in js
+     //receiver
+func (d deck) print() { //any variable of type 'deck' get access to the print method
+	for _, card := range d {
+		fmt.Println(card)
+	}
+}
+
+func newDeck() deck { //anytime newDeck is called it returns a type of deck
 	cards := deck{}
 	cardSuits := []string{"Spades", "Diamonds", "Hearts", "Clubs"}
-	cardValues := []string{"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King"}
-	for _, suit := range cardSuits {
+	cardValues := []string{"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"}
+	for _, suit := range cardSuits { // builds new deck by appending concatenated string to deck
 		for _, value := range cardValues {
-			cards = append(cards, value+" of "+suit)
+			cards = append(cards, value + " of " + suit)
 		}
 	}
 	return cards
 }
+          //arguments           //return values
+func deal(d deck, handSize int) (deck, deck) { //this function splits up the deck with the handSize and returns two values each of type deck
+	return d[:handSize], d[handSize:] // first value returned is a 'slice' of the deck slice up to and including handSize
+}	                                  // second value returned is the remaining deck
 
-func (d deck) print() {
-	for i, card := range d {
-		fmt.Println(i, card)
-	}
-}
-
-func deal(d deck, handSize int) (deck, deck) {
-	return d[:handSize], d[handSize:]
-}
-
-func (d deck) toString() string {
-	return strings.Join([]string(d), ",")
-}
-
-func (d deck) saveToFile(filename string) error {
-	return ioutil.WriteFile(filename, []byte(d.toString()), 0666)
-}
-
-func newDeckFromFile(filename string) deck {
-	bs, err := ioutil.ReadFile(filename)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		os.Exit(1)
-	}
-	return deck(strings.Split(string(bs), ","))
-}
-
-func (d deck) shuffle() {
-	source := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(source)
-	for i := range d {
-		newPosition := r.Intn(len(d) - 1)
-		d[i],d[newPosition] = d[newPosition], d[i]
-	}
-}
